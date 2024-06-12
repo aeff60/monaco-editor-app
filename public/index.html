@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monaco Editor</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/editor/editor.main.css"
+    />
+  </head>
+  <body>
+    <div
+      id="container"
+      style="width: 800px; height: 600px; border: 1px solid grey"
+    ></div>
+    <button id="runButton">Run</button>
+    <pre
+      id="output"
+      style="
+        border: 1px solid grey;
+        width: 800px;
+        height: 200px;
+        margin-top: 10px;
+      "
+    ></pre>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.js"></script>
+    <script>
+      require.config({
+        paths: {
+          vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs",
+        },
+      });
+      require(["vs/editor/editor.main"], function () {
+        var editor = monaco.editor.create(
+          document.getElementById("container"),
+          {
+            value: [""].join("\n"),
+            language: "javascript",
+          }
+        );
+
+        document
+          .getElementById("runButton")
+          .addEventListener("click", function () {
+            var code = editor.getValue();
+            runCode(code);
+          });
+
+        function runCode(code) {
+          try {
+            // Capture console.log output
+            var output = "";
+            var originalLog = console.log;
+            console.log = function (message) {
+              output += message + "\n";
+              originalLog.apply(console, arguments);
+            };
+
+            eval(code);
+
+            document.getElementById("output").textContent = output;
+
+            // Restore console.log
+            console.log = originalLog;
+          } catch (e) {
+            document.getElementById("output").textContent =
+              "Error: " + e.message;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
